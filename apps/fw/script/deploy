@@ -1,0 +1,10 @@
+#!/bin/sh
+set -ex
+
+response=$(curl --retry 5 -T _images/rpi3/fw.fw "http://192.168.1.12:8988/firmware" -H "Content-Type: application/x-firmware" -H "X-Reboot: true")
+echo $resonse
+status=$?
+if [ $status -ne 0 ]; then
+  echo "Deploy Failed" >&2
+fi
+exit $status
