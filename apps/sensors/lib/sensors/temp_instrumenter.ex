@@ -3,10 +3,11 @@ defmodule Sensors.TempInstrumenter do
 
   def setup do
     Gauge.declare([name: :temperature,
+                   labels: [:address],
                    help: "Temperature"])
   end
 
-  def set_temp(temp) do
-    Gauge.set([name: :temperature], temp)
+  def set_temp(label, temp) do
+    Gauge.set([name: :temperature, labels: [label]], temp)
   end
 end

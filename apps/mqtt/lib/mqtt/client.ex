@@ -46,10 +46,13 @@ defmodule Mqtt.Client do
     {:ok, state}
   end
 
-  def handle_info({:update, sensor, value}, state) do
-    Logger.debug "Sending: #{inspect value} to sensors/watering_pi/#{sensor}"
+  def handle_info({:update, sensor, label, value}, state) do
+    topic = "sensors/watering_pi/#{sensor}/#{label}"
+    value = value |> to_string
 
-    publish("sensors/watering_pi/#{sensor}", value |> to_string, 2)
+    Logger.debug "Sending: #{value} to #{topic}"
+
+    publish(topic, value, 2)
 
     {:noreply, state}
   end

@@ -5,42 +5,42 @@ defmodule Sensors.HistoryManager do
   alias Sensors.History, as: History
   alias Sensors.I2CMoistureSensor, as: I2CMoistureSensor
 
-  defstruct [:device_address, :history, :options]
+  defstruct [:address, :history]
 
   @pause_ms 60_000
 
-  def start_link(device_address, options \\ [persist: true]) do
-    GenServer.start_link(__MODULE__, {device_address, options}, name: via_tuple(device_address))
+  def start_link(address) do
+    GenServer.start_link(__MODULE__, address, name: via_tuple(address))
   end
 
+  def via_tuple({multiplexer_address, device_address, channel}) do
+    {:via, :gproc, {:n, :l, {:sensor_history, multiplexer_address, device_address, channel}}}
+  end
   def via_tuple(device_address) do
     {:via, :gproc, {:n, :l, {:sensors_history, device_address}}}
   end
 
-  def init({device_address, options}) do
-    state = default(device_address, options)
-    Sensors.TempInstrumenter.setup
-    Sensors.MoistureInstrumenter.setup
-    Sensors.LightInstrumenter.setup
+  def init(address) do
+    state = default(address)
     Process.send_after(self, :update, @pause_ms)
     {:ok, state}
   end
 
-  def add(device_address, entry) do
-    device_address
+  def add(address, entry) do
+    address
     |> via_tuple
     |> GenServer.cast({:add, entry})
     entry
   end
 
-  def get_history(device_address) do
-    device_address
+  def get_history(address) do
+    address
     |> via_tuple
     |> GenServer.call(:get_history)
   end
 
   def handle_info(:update, state) do
-    state.device_address
+    state.address
     |> via_tuple
     |> GenServer.cast({:update})
 
@@ -60,36 +60,43 @@ defmodule Sensors.HistoryManager do
   end
 
   def handle_cast({:add, entry}, state) do
-    entry |> cast
+    state.address
+    |> cast(entry)
     {:noreply, %__MODULE__{state | history: state.history |> History.add(entry)}}
   end
 
   defp add_latest(state) do
-    {temp, light, moisture} = I2CMoistureSensor.status(state.device_address)
+    {temp, light, moisture} = I2CMoistureSensor.status(state.address)
 
     entry = Sensors.Entry.new(temp, moisture, light)
 
-    state.device_address
+    state.address
     |> via_tuple
     |> GenServer.cast({:add, entry})
 
     entry
   end
 
-  defp default(device_address, options) do
-    new(device_address, History.new, options)
+  defp default(address) do
+    new(address, History.new)
   end
 
-  defp new(device_address, history, options) do
-    %__MODULE__{device_address: device_address, history: history, options: options}
+  defp new(address, history) do
+    %__MODULE__{address: address, history: history}
   end
 
-  defp cast(entry) do
-    :gproc.send({:p, :l, {:listener, :temp}}, {:update, "temp", entry.temp})
-    :gproc.send({:p, :l, {:listener, :moisture}}, {:update, "moisture", entry.moisture})
-    :gproc.send({:p, :l, {:listener, :light}}, {:update, "light", entry.light})
-    Sensors.TempInstrumenter.set_temp(entry.temp)
-    Sensors.MoistureInstrumenter.set_moisture(entry.moisture)
-    Sensors.LightInstrumenter.set_light(entry.light)
+  defp cast(address, entry) do
+    :gproc.send({:p, :l, {:listener, :temp}}, {:update, "temp", label(address), entry.temp})
+    :gproc.send({:p, :l, {:listener, :moisture}}, {:update, "moisture", label(address), entry.moisture})
+    :gproc.send({:p, :l, {:listener, :light}}, {:update, "light", label(address), entry.light})
+  end
+
+  defp label({multiplexer_address, device_address, channel}) do
+    "#{inspect multiplexer_address}_#{inspect device_address}_#{inspect channel}"
+    |> String.to_atom
+  end
+  defp label(device_address) do
+    "#{inspect device_address}"
+    |> String.to_atom
   end
 end
