@@ -31,7 +31,7 @@ defmodule Fw.Mixfile do
   def applications(:prod), do: [:nerves_interim_wifi, :logger_multicast_backend, :nerves_firmware_http, :nerves_ntp | general_apps]
   def applications(_), do: general_apps
 
-  defp general_apps, do: [:runtime_tools, :logger, :sensors, :mqtt, :web]
+  defp general_apps, do: [:runtime_tools, :logger, :sensors, :pump, :mqtt, :web]
 
   def deps do
     [
@@ -41,6 +41,7 @@ defmodule Fw.Mixfile do
       {:nerves_firmware_http, github: "nerves-project/nerves_firmware_http", only: :prod},
       {:logger_multicast_backend, github: "cellulose/logger_multicast_backend"},
       {:sensors, in_umbrella: true},
+      {:pump, in_umbrella: true},
       {:mqtt, in_umbrella: true},
       {:web, in_umbrella: true}
     ]
