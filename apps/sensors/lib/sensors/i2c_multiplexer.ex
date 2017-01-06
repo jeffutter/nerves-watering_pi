@@ -17,13 +17,13 @@ defmodule Sensors.I2CMultiplexer do
 
   def write_read(multiplexer_address, device_address, channel, write_data, read_count) do
     multiplexer_address
-    |> via_tuple
+    |> via_tuple()
     |> GenServer.call({:write_read, device_address, channel, write_data, read_count})
   end
 
   def write(multiplexer_address, device_address, channel, write_data) do
     multiplexer_address
-    |> via_tuple
+    |> via_tuple()
     |> GenServer.call({:write, device_address, channel, write_data})
   end
 

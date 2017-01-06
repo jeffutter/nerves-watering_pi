@@ -28,8 +28,8 @@ defmodule Fw.Mixfile do
      applications: applications(Mix.env)]
   end
 
-  def applications(:prod), do: [:nerves_interim_wifi, :logger_multicast_backend, :nerves_firmware_http, :nerves_ntp | general_apps]
-  def applications(_), do: general_apps
+  def applications(:prod), do: [:nerves_interim_wifi, :logger_multicast_backend, :nerves_firmware_http, :nerves_ntp | general_apps()]
+  def applications(_), do: general_apps()
 
   defp general_apps, do: [:runtime_tools, :logger, :sensors, :pump, :mqtt, :web]
 

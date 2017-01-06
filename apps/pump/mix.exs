@@ -11,7 +11,7 @@ defmodule Pump.Mixfile do
      elixir: "~> 1.3",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
-     deps: deps]
+     deps: deps()]
   end
 
   # Configuration for the OTP application
@@ -22,8 +22,8 @@ defmodule Pump.Mixfile do
      mod: {Pump, []}]
   end
 
-  def applications(:prod), do: [:elixir_ale | general_apps]
-  def applications(_), do: general_apps
+  def applications(:prod), do: [:elixir_ale | general_apps()]
+  def applications(_), do: general_apps()
 
   defp general_apps, do: [:logger, :gproc, :prometheus_ex]
 

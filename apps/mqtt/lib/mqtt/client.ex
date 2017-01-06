@@ -5,7 +5,7 @@ defmodule Mqtt.Client do
   def start_link do
     host = Application.get_env(:mqtt, :host)
     client_name = Application.get_env(:mqtt, :client_name)
-    GenMQTT.start_link(__MODULE__, [], [name: via_tuple, host: host, client: client_name])
+    GenMQTT.start_link(__MODULE__, [], [name: via_tuple(), host: host, client: client_name])
   end
 
   def via_tuple() do
@@ -21,7 +21,7 @@ defmodule Mqtt.Client do
   end
 
   def publish(topic, payload, qos) do
-    via_tuple
+    via_tuple()
     |> GenServer.whereis
     |> GenMQTT.publish(topic, payload, qos, false)
   end

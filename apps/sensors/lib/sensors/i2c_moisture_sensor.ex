@@ -28,19 +28,19 @@ defmodule Sensors.I2CMoistureSensor do
 
   def temp(address) do
     address
-    |> via_tuple
+    |> via_tuple()
     |> GenServer.call({:temp})
   end
 
   def light(address) do
     address
-    |> via_tuple
+    |> via_tuple()
     |> GenServer.call({:light})
   end
 
   def moisture(address) do
     address
-    |> via_tuple
+    |> via_tuple()
     |> GenServer.call({:moisture})
   end
 

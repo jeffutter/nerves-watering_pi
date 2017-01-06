@@ -2,7 +2,7 @@ defmodule Pump.Pump do
   use GenServer
 
   def start_link(pwm_gpio, gpio1, gpio2) do
-    GenServer.start_link(__MODULE__, {pwm_gpio, gio1, gpio2}, name: via_tuple({pwm_gpio, gpio1, gpio2}))
+    GenServer.start_link(__MODULE__, {pwm_gpio, gpio1, gpio2}, name: via_tuple({pwm_gpio, gpio1, gpio2}))
   end
 
   def via_tuple({pwm_gpio, gpio1, gpio2}) do
@@ -19,13 +19,13 @@ defmodule Pump.Pump do
 
   def on(gpios) do
     gpios
-    |> via_tuple
+    |> via_tuple()
     |> GenServer.call({:on})
   end
 
   def off(gpios) do
     gpios
-    |> via_tuple
+    |> via_tuple()
     |> GenServer.call({:off})
   end
 

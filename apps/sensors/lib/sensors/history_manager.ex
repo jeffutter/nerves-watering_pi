@@ -22,29 +22,29 @@ defmodule Sensors.HistoryManager do
 
   def init(address) do
     state = default(address)
-    Process.send_after(self, :update, @pause_ms)
+    Process.send_after(self(), :update, @pause_ms)
     {:ok, state}
   end
 
   def add(address, entry) do
     address
-    |> via_tuple
+    |> via_tuple()
     |> GenServer.cast({:add, entry})
     entry
   end
 
   def get_history(address) do
     address
-    |> via_tuple
+    |> via_tuple()
     |> GenServer.call(:get_history)
   end
 
   def handle_info(:update, state) do
     state.address
-    |> via_tuple
+    |> via_tuple()
     |> GenServer.cast({:update})
 
-    Process.send_after(self, :update, @pause_ms)
+    Process.send_after(self(), :update, @pause_ms)
     {:noreply, state}
   end
 
@@ -71,7 +71,7 @@ defmodule Sensors.HistoryManager do
     entry = Sensors.Entry.new(temp, moisture, light)
 
     state.address
-    |> via_tuple
+    |> via_tuple()
     |> GenServer.cast({:add, entry})
 
     entry
